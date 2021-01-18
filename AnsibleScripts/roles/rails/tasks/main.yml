@@ -1,0 +1,67 @@
+---
+- name: Add yarn key
+  apt_key:
+    url: https://dl.yarnpkg.com/debian/pubkey.gpg
+  become: yes
+
+- name: Add yarn repository
+  apt_repository:
+    repo: deb https://dl.yarnpkg.com/debian/ stable main
+    update_cache: yes
+  become: yes
+
+- name: Install yarn
+  apt:
+    name: yarn
+    install_recommends: no
+  become: yes
+
+- name: Create deploy dir
+  file: path={{ deploy_dir }}{{ deploy_app_name }} state=directory owner={{ deploy_user }} group={{ deploy_user }}
+
+
+- name: Create shared directories
+  file:
+    path: "{{ deploy_dir }}/{{deploy_app_name }}/{{ item }}"
+    state: directory
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+  with_items: "{{ shared_dirs }}"
+
+- name: Copy secrets.yml
+  template: src=secrets.yml dest={{ deploy_dir }}{{ deploy_app_name }}/shared/config/secrets.yml owner={{ deploy_user }} group={{ deploy_user }}
+
+- name: Copy database.yml
+  template: src=database.yml dest={{ deploy_dir }}{{ deploy_app_name }}/shared/config/database.yml owner={{ deploy_user }} group={{ deploy_user }}
+
+- name: Copy puma.rb
+  template: src=puma.rb dest={{ deploy_dir }}{{ deploy_app_name }}/shared/puma.rb owner={{ deploy_user }} group={{ deploy_user }}
+
+#- name: Project bulding 
+#  become: true
+#  become_method: sudo
+#  become_user: "{{ deploy_user }}"
+#  command: su  " -c "rails new . && gem install bundler"
+#  args:
+#    chdir: "{{ deploy_dir }}{{ deploy_app_name }}"
+#    #executable: /bin/bash
+
+- name: Ensure app SystemD service present for Puma
+  template: src=puma.service.j2 dest=/etc/systemd/system/{{ app_puma_service_name }}.service force=yes owner={{ deploy_user }} group={{ deploy_user }}  mode=0644
+
+- name: Enable puma
+  systemd:
+    name: "{{ app_puma_service_name }}"
+    enabled: True
+    daemon_reload: yes
+
+- name: Restart puma
+  systemd:
+    name: "{{ app_puma_service_name }}"
+    state: started    
+
+- name: Restart Nginx
+  service: name=nginx state=restarted enabled=yes
+
+- name: Ensure Nginx is running
+  service: name=nginx state=started enabled=yes

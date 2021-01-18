@@ -1,0 +1,14 @@
+---
+- hosts: Dev
+#    become: yes
+  gather_facts: yes
+  roles:
+#     - { role: apt_update, when:  ansible_distribution == "Ubuntu"  }
+#     - { role: yum_update, when: ( ansible_distribution == "CentOS" ) or
+#                                   ( ansible_distribution == "Amazon" ) or
+#                                   ( ansible_distribution == "RedHat" ) }
+      - apt_update
+  vars:
+    reboot_ok: false
+
+# ansible-playbook -b -u <user> --private-key <path to key> -i hosts -l <host-group> main.yml [--extra-vars reboot_ok=true]

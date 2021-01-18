@@ -1,0 +1,49 @@
+[Unit]
+Description=sidekiq
+After=syslog.target network.target
+
+# Uncomment for socket activation (see below)
+# Requires=puma.socket
+
+[Service]
+# Puma supports systemd's `Type=notify` and watchdog service
+# monitoring, if the [sd_notify](https://github.com/agis/ruby-sdnotify) gem is installed,
+# as of Puma 5.1 or later.
+# On earlier versions of Puma or JRuby, change this to `Type=simple` and remove
+# the `WatchdogSec` line.
+Type=notify
+
+# If your Puma process locks up, systemd's watchdog will restart it within seconds.
+WatchdogSec=10
+
+# Preferably configure a non-privileged user
+# User=
+User={{ deploy_user }}
+
+# The path to the your application code root directory.
+# Also replace the "<YOUR_APP_PATH>" place holders below with this path.
+# Example /home/username/myapp
+#WorkingDirectory=<YOUR_APP_PATH>
+WorkingDirectory={{deploy_dir}}{{deploy_app_name}}
+# Helpful for debugging socket activation, etc.
+Environment=MALLOC_ARENA_MAX=2
+
+# SystemD will not run puma even if it is in your path. You must specify
+# an absolute URL to puma. For example /usr/local/bin/puma
+# Alternatively, create a binstub with `bundle binstubs puma --path ./sbin` in the WorkingDirectory
+ExecStart=/bin/bash -lc '/opt/rubies/ruby-{{ruby_version }}/bin/bundle exec --keep-file-descriptors sidekiq -e {{ app_env }} -C {{ deploy_dir }}{{ deploy_app_name }}/shared/config/sidekiq.yml'
+#ExecStop= {{ deploy_dir }}.gem/ruby/{{ruby_version }}/bin/bundle exec puma -e production -S {{ deploy_dir }}{{ deploy_app_name }}/shared/puma.rb
+PIDFile={{deploy_dir}}{{deploy_app_name}}/puma.pid
+
+# Variant: Rails start.
+# ExecStart=/<FULLPATH>/bin/puma -C <YOUR_APP_PATH>/config/puma.rb ../config.ru
+
+# Variant: Use `bundle exec --keep-file-descriptors puma` instead of binstub
+# Variant: Specify directives inline.
+# ExecStart=/<FULLPATH>/puma -b tcp://0.0.0.0:9292 -b ssl://0.0.0.0:9293?key=key.pem&cert=cert.pem
+
+
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

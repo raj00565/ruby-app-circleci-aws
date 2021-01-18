@@ -1,0 +1,9 @@
+[Dev]
+server1 ansible_host=18.184.59.201 ansible_user=root
+
+[Prod]
+host11.prod.example.com
+host12.prod.example.com
+
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3

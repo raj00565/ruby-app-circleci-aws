@@ -1,0 +1,67 @@
+  upstream app {
+    server unix:{{ deploy_dir  }}{{ deploy_app_name }}/shared/tmp/sockets/puma.sock fail_timeout=0;
+#    server 127.0.0.1:3000;
+  }
+
+  upstream kibana {
+    server search-cryoport-production-omn2afthoi7rlwzbrseydbbfbu.us-west-1.es.amazonaws.com;
+  }
+
+  server {
+    listen 80;
+    listen [::]:80;
+
+    server_name {{ deploy_server_hostname }};
+    access_log {{ deploy_dir  }}{{ deploy_app_name }}/shared/log/nginx.access.log;
+    error_log {{ deploy_dir  }}{{ deploy_app_name }}/shared/log/nginx.error.log;
+
+#    root /home/cryo/current/public;
+    root {{ deploy_dir  }}{{ deploy_app_name }}/current/public;
+    location @proxy {
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header Host $http_host;
+      proxy_redirect off;
+      proxy_pass http://app;
+    }
+
+    location ~ ^/_plugin/kibana/  {
+      proxy_redirect off;
+      proxy_pass http://kibana;
+    }
+
+    location ~ ^/(assets)/  {
+      root {{ deploy_dir  }}{{ deploy_app_name }}/current/public;
+      gzip_static on;
+      expires max;
+      add_header Cache-Control public;
+    }
+
+    location / {
+      try_files /maintenance.html $uri $uri/index.html $uri.html @proxy;
+    }
+
+    location /favicon.ico {
+      alias {{ deploy_dir  }}{{ deploy_app_name }}/shared/favicon.ico;
+      expires 365d;
+      access_log off;
+    }
+
+    location /ping {
+      keepalive_timeout 0;
+      access_log off;
+      return 204;
+    }
+
+    location ~ ^/_monit {
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header Host $http_host;
+      proxy_redirect off;
+
+      rewrite ^/_monit/(.*)$ /$1 break;
+      proxy_pass http://localhost:2812;
+    }
+
+  }
+
+
+

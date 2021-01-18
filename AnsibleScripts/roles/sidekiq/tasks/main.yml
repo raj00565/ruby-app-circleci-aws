@@ -1,0 +1,20 @@
+---
+
+- name: Copy sidekiq.yml
+  template: src=sidekiq.yml.j2 dest={{ deploy_dir }}{{ deploy_app_name }}/shared/config/sidekiq.yml owner={{ deploy_user }} group={{ deploy_user }}
+
+- name: Ensure app Sidekiq service present 
+  template: src=sidekiq.service.j2 dest=/etc/systemd/system/{{ app_sidekiq_service_name  }}.service force=yes owner={{ deploy_user }} group={{ deploy_user }}  mode=0644
+
+- name: Enable sidekiq
+  systemd:
+    name: "{{ app_sidekiq_service_name }}"
+    enabled: True
+    daemon_reload: yes
+
+- name: Restart sidekiq
+  systemd:
+    name: "{{ app_sidekiq_service_name }}"
+    state: started
+
+

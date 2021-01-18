@@ -1,0 +1,47 @@
+---
+- name: Check if amazon-cloudwatch-agent is installed
+  command: dpkg-query -W amazon-cloudwatch-agent
+  register: my_package_check_deb
+  failed_when: my_package_check_deb.rc > 1
+  changed_when: my_package_check_deb.rc == 1
+
+- name: Download cloudwatch
+  get_url: 
+    url="{{ cloudwatch_deb_url }}"
+    dest="{{ deploy_dir }}/amazon-cloudwatch-agent.deb"
+  when: my_package_check_deb.rc == 1
+
+- name: Install AWS-CLI
+  apt:
+    name: awscli
+    install_recommends: yes
+  become: yes
+
+- name: Install cloudwatch
+  apt: deb="{{ deploy_dir }}/amazon-cloudwatch-agent.deb" 
+  when: my_package_check_deb.rc == 1
+
+
+- name: AWS credentials Setup
+  template:
+    src: "amazon-credentials.j2"
+    dest: "/root/.aws/credentials"
+    mode: 0644
+
+- name: place cfgs, ie. amazon-cloudwatch-agent.json
+  template:
+    src: "amazon-cloudwatch-agent.json.j2"
+    dest: "/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json"
+    mode: 0644
+
+- name: enable cloudwatch service on boot
+  systemd:
+    name: "amazon-cloudwatch-agent"
+    state: started
+    enabled: True
+
+- name: restart service clodwatch agent
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: "amazon-cloudwatch-agent"
