@@ -12,6 +12,7 @@ fi
 pip3 list | grep -q ansible
 if [ $? != 0 ]; then
     pip3 install ansible
+fi
 
 apt install ruby-full -y
 apt install ruby-railties -y
