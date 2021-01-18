@@ -6,7 +6,7 @@ workflows:
     jobs:
       - aws-code-deploy/deploy:
           application-name: sampleapp
-          arguments: '--profile assume_role'
+          arguments: '--profile default'
           bundle-bucket: sampleappraj
           bundle-key: sample/SourceArti
           deployment-group: sampleapp-group
