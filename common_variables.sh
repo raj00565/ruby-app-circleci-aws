@@ -12,4 +12,4 @@ DEPLOY_GROUP="ansible"
 BUCKET="<bucket-name>"
 BUNDLE_PATH="ansible-playbooks.zip"
 
-DESTINATION_PATH="/etc/ansible/codedeploy"
+DESTINATION_PATH="/home/ubuntu"
