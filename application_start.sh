@@ -15,6 +15,5 @@ if [ $? != 0 ]; then
 
 apt install ruby-full -y
 apt install ruby-railties -y
-##
 
 #ansible-playbook $DESTINATION_PATH/AnsibleScripts/site.yml -i $DESTINATION_PATH/AnsibleScripts/hosts --connection=local 
