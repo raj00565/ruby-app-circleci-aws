@@ -5,9 +5,9 @@ workflows:
   deploy_application:
     jobs:
       - aws-code-deploy/deploy:
-          application-name: myApplication
+          application-name: sampleapp
           arguments: '--profile assume_role'
           bundle-bucket: sampleappraj
           bundle-key: myS3BucketKey
-          deployment-group: myDeploymentGroup
-          service-role-arn: myDeploymentGroupRoleARN
+          deployment-group: sampleapp
+          service-role-arn: arn:aws:iam::978016941027:role/sampleappdeploy
