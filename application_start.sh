@@ -4,4 +4,16 @@
 # our deploy_hooks directory.
 . $(dirname $0)/common_variables.sh
 
-ansible-playbook $DESTINATION_PATH/AnsibleScripts/site.yml -i $DESTINATION_PATH/AnsibleScripts/hosts --connection=local 
+apt update -y &> /dev/null
+if [ $? != 0 ]; then
+    apt install python3-pip -y
+fi
+
+pip3 list | grep -q ansible
+if [ $? != 0 ]; then
+    pip3 install ansible
+
+apt install ruby-full -y
+apt install ruby-railties -y
+
+#ansible-playbook $DESTINATION_PATH/AnsibleScripts/site.yml -i $DESTINATION_PATH/AnsibleScripts/hosts --connection=local 
