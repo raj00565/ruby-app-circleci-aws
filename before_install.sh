@@ -13,5 +13,5 @@ if [ $? != 0 ]; then
 fi
 apt install build-essential -y
 apt install curl -y
-ansible-playbook $DESTINATION_PATH/AnsibleScripts/site.yml -i $DESTINATION_PATH/AnsibleScripts/hosts --connection=local
+ansible-playbook /home/ubuntu/AnsibleScripts/site.yml -i /home/ubuntu/AnsibleScripts/hosts --connection=local
 
