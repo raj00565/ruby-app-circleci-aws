@@ -8,6 +8,6 @@ workflows:
           application-name: sampleapp
           arguments: '--profile assume_role'
           bundle-bucket: sampleappraj
-          bundle-key: myS3BucketKey
-          deployment-group: sampleapp
+          bundle-key: sample/SourceArti
+          deployment-group: sampleapp-group
           service-role-arn: arn:aws:iam::978016941027:role/sampleappdeploy
