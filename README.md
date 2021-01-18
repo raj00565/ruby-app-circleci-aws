@@ -1,35 +1,12 @@
-# Ruby on Rails Tutorial sample application
+Ansible and AWS CodeDeploy
+--------------------------
 
-This is the sample application for
-[*Ruby on Rails Tutorial:
-Learn Web Development with Rails*](http://www.railstutorial.org/)
-by [Michael Hartl](http://www.michaelhartl.com/).
+[Ansible](http://www.ansible.com) is a radically simple IT automation platform that makes your
+applications and systems easier to deploy. If you already have a set of Ansible playbooks, but just
+need somewhere to run them, our first template for Ansible and AWS CodeDeploy will demonstrate how a
+couple of simple deployment hooks will ensure Ansible is available on the local deployment instance
+and run the given playbooks.  Alternatively, if you already have a process for building and
+maintaining your inventory, we've also built an Ansible module that you can use to install and run
+the AWS CodeDeploy host agent.
 
-## Getting started
-
-To get started with the app, clone the repo and then install the needed gems:
-
-```
-$ bundle install --without production
-```
-
-Next, migrate the database:
-
-```
-$ rails db:migrate
-```
-
-Finally, run the test suite to verify that everything is working correctly:
-
-```
-$ rails test
-```
-
-If the test suite passes, you'll be ready to run the app in a local server:
-
-```
-$ rails server
-```
-
-For more information, see the
-[*Ruby on Rails Tutorial* book](http://www.railstutorial.org/book).
+[Learn more >](https://github.com/awslabs/aws-codedeploy-samples)
