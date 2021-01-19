@@ -8,6 +8,6 @@ workflows:
           application-name: sampleapp
           arguments: '--profile default'
           bundle-bucket: sampleappraj
-          bundle-key: sample/SourceArti-${CIRCLE_BRANCH}-$CIRCLE_PR_NUMBER- $CIRCLE_PR_USERNAME-$CIRCLE_BUILD_NUM-$CIRCLE_JOB
+          bundle-key: sample/SourceArti-${CIRCLE_BRANCH}-$CIRCLE_PR_NUMBER-$CIRCLE_PR_USERNAME-$CIRCLE_BUILD_NUM-$CIRCLE_JOB
           deployment-group: sampleapp-group
           service-role-arn: arn:aws:iam::978016941027:role/sampleappdeploy
