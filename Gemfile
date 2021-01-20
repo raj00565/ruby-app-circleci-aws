@@ -1,5 +1,14 @@
 source 'https://rubygems.org'
 
+group :development do
+  gem 'capistrano', '~> 3.6'
+  gem 'capistrano-rails', '~> 1.2'
+  gem 'capistrano-chruby'
+  gem 'capistrano3-puma'
+  gem 'capistrano-sidekiq'
+  gem 'capistrano-npm'
+end
+
 gem 'rails',                   '5.1.2'
 gem 'bcrypt',                  '3.1.11'
 gem 'faker',                   '1.6.3'
