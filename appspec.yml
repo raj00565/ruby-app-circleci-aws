@@ -2,7 +2,7 @@ version: 0.0
 os: linux
 files:
   - source: /
-    destination: /home/cryo
+    destination: /home/cryo/SET_APP_NAME_HERE
 hooks:
 #  BeforeInstall:
 #    - location: before_install.sh
