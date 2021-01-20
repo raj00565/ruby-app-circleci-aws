@@ -17,4 +17,7 @@ fi
 apt install ruby-full -y
 apt install ruby-railties -y
 
+service puma restart 
+service sidekiq restart
+
 #ansible-playbook $DESTINATION_PATH/AnsibleScripts/site.yml -i $DESTINATION_PATH/AnsibleScripts/hosts --connection=local 
