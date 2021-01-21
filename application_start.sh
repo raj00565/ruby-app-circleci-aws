@@ -14,7 +14,6 @@ if [ $? != 0 ]; then
     pip3 install ansible
 fi
 
-service puma restart &> /dev/null
-service sidekiq restart &> /dev/null
+
 
 #ansible-playbook $DESTINATION_PATH/AnsibleScripts/site.yml -i $DESTINATION_PATH/AnsibleScripts/hosts --connection=local 
