@@ -302,7 +302,7 @@ workflows:
       - check-db-setup
       - test:
           post-steps:
- #           - jira/notify
+         #  - jira/notify
       - merge-coverage-results:
           requires:
             - test
@@ -317,7 +317,8 @@ workflows:
           requires:
             - test
           filters:
-            branches:${CIRCLE_BRANCH}
-              only: 
+            branches:
+             only: ${CIRCLE_BRANCH} 
           post-steps:
-#            - jira/notify
+          # - jira/notify
+
