@@ -300,8 +300,8 @@ workflows:
     jobs:
       - check-missing-schema-changes
       - check-db-setup
-      - test:
-          post-steps:
+      - test
+         # post-steps:
          #  - jira/notify
       - merge-coverage-results:
           requires:
