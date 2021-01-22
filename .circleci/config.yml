@@ -1,9 +1,312 @@
-orbs:
-  aws-code-deploy: circleci/aws-code-deploy@1.0.1
 version: 2.1
+
+orbs:
+  status_to_ms_teams: bluemarblepayroll/status_to_ms_teams_pure_bash@1.0.1
+  jira: circleci/jira@1.1.2
+  aws-code-deploy: circleci/aws-code-deploy@1.0.1
+
+parameters:
+  ruby-version:
+    type: string
+    default: "2.6.5"
+
+commands:
+
+  add-cryotrack-ssh-key:
+    description: Add github read key, needed to clone private cryotrack repo
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "559:9f"
+
+  path-add-node-modules:
+    description: Add node_modules/.bin to PATH
+    steps:
+      - run: echo 'export PATH=${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin:$PATH' >> $BASH_ENV
+
+  config-setup:
+    description: Copy Example Configs
+    steps:
+      - run: cp config/database.example.yml config/database.yml
+      - run: cp config/secrets.example.yml config/secrets.yml
+
+  bundle-cache-restore:
+    description: Look for and restore cached ruby gems installed by bundler.
+    steps:
+      - restore_cache:
+          keys:
+            - &bundle_cache_key ruby-<< pipeline.parameters.ruby-version >>-bundle-v2-{{ checksum "Gemfile.lock" }}
+            - bundle-v2
+            - bundle-v1
+
+  bundle-setup:
+    description: Install bundled gems while fetching and refreshing cached gems.
+    steps:
+      - bundle-cache-restore
+      - run: bundle check || sudo apt install cmake && bundle install
+      - save_cache:
+          key: *bundle_cache_key
+          paths:
+            - &bundle_path vendor/bundle
+
+  yarn-cache-restore:
+    description: Look for and restore cached node modules installed by yarn.
+    steps:
+      - restore_cache:
+          keys:
+            - &yarn_cache_key yarn-{{ checksum "yarn.lock" }}
+            - yarn-
+
+  yarn-setup:
+    description: Install packaged node modules while fetching and refreshing cached modules.
+    steps:
+      - yarn-cache-restore
+      - run: yarn install --non-interactive --frozen-lockfile
+      - save_cache:
+          key: *yarn_cache_key
+          paths:
+            - &yarn_cache_folder .cache/yarn
+
+  webpacker-build:
+    description: Build packed javascript
+    steps:
+      - run: bin/webpack
+
+  service-wait-for:
+    description: Wait for a dependent service to become available
+    parameters:
+      protocol:
+        type: string
+        default: tcp
+      host:
+        type: string
+      port:
+        type: integer
+      timeout:
+        type: integer
+        description: Number of seconds to allow for the post to respond before timing out and failing.
+        default: 15
+    steps:
+      - run: dockerize -wait << parameters.protocol >>://<< parameters.host >>:<< parameters.port >> -timeout << parameters.timeout >>s
+
+  wait-for-db:
+    steps:
+      - service-wait-for:
+          host: db
+          port: 3306
+
+  wait-for-elasticsearch:
+    steps:
+      - service-wait-for:
+          host: elasticsearch
+          port: 9200
+
+  database-setup:
+    description: Create and load database schema
+    steps:
+      - run: bin/rails db:create
+      - run: bin/rails db:schema:load
+
+  test-app:
+    description: Run *all* app tests
+    steps:
+      - run: mkdir test_results
+      - run-tests
+      - run: bin/rake db:drop db:create db:schema:load
+      - run-specs
+      - store_test_results:
+          path: test_results
+
+  run-tests:
+    description: Run rails app tests
+    steps:
+      - run: |
+          bin/rails test --ci-report --ci-dir=test_results/minitest \
+            $(circleci tests glob "test/**/*_test.rb" | circleci tests split --split-by=timings)
+      - store_artifacts:
+          path: coverage
+
+  run-specs:
+    description: Run app specs
+    steps:
+      - run: |
+          bin/rspec --profile 10 --format RspecJunitFormatter --out test_results/rspec/results.xml --format progress \
+            $(circleci tests glob "spec/**/*_spec.rb" | circleci tests split --split-by=timings)
+      - store_artifacts:
+          path: 'tmp/capybara'
+          destination: 'capybara'
+      - store_artifacts:
+          path: 'log/rspec.log'
+          destination: 'rspec.log'
+      - store_artifacts:
+          path: coverage
+
+  notify-ms-teams:
+    description: Send job status to MS Teams.
+    steps:
+      - status_to_ms_teams/report:
+          webhook_url: ${CIRCLECI_MS_TEAMS_WEBHOOK}
+
+  notify-external-services:
+    description: Send job status to external services that may be missing an integration with CircleCI.
+    steps:
+      - notify-ms-teams
+
+  stash-coverage-results:
+    description: Stash coverage results from SimpleCov
+    steps:
+      - run: |
+          mkdir coverage_results
+          cp -R coverage/.resultset.json coverage_results/.resultset-${CIRCLE_NODE_INDEX}.json
+      - persist_to_workspace:
+          root: .
+          paths:
+            - coverage_results
+
+  merge-coverage:
+    description: Merge coverage
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run: |
+          gem install simplecov -v 0.20.0
+          ruby spec/simple_cov_helpers.rb
+      - store_artifacts:
+          path: ~/project/coverage
+          destination: coverage
+
+executors:
+  machine-executor:
+    machine: true
+
+  test-stack:
+    docker:
+      # Application container (Ruby, Node)
+      - &app_container
+        image: circleci/ruby:<< pipeline.parameters.ruby-version >>-node-browsers
+        environment:
+          BUNDLE_JOBS: 3
+          BUNDLE_PATH: *bundle_path
+          BUNDLE_RETRY: 3
+          BUNDLE_WITHOUT: development:staging:production:qa:osx
+          COV: true
+          RAILS_ENV: test
+          YARN_CACHE_FOLDER: *yarn_cache_folder
+          JAVA_HOME: /usr/lib/jvm/java-8-openjdk-amd64
+      # Database container (mysql)
+      - &db_container
+        image: circleci/mysql:5.7
+        name: db
+        environment:
+          MYSQL_ROOT_HOST: "%"
+          MYSQL_ROOT_PASSWORD: fun
+          MYSQL_USER: root
+      # Search service container (elasticsearch)
+      - &es_container
+        image: elasticsearch:6.8.2
+        name: elasticsearch
+
+  build-stack:
+    docker:
+      - image: circleci/ruby:<< pipeline.parameters.ruby-version >>
+        environment:
+          BUNDLE_JOBS: 3
+          BUNDLE_PATH: *bundle_path
+          BUNDLE_RETRY: 3
+          BUNDLE_WITHOUT: lint:test:staging:qa:training:production
+          RAILS_ENV: development
+      - *db_container
+      - *es_container
+
+  deploy-stack:
+    docker:
+      - *app_container
+
+jobs:
+
+  check-missing-schema-changes:
+    executor:
+      name: deploy-stack
+    steps:
+      - checkout
+      - run:
+          name: Check missing schema changes
+          command: git diff-index --quiet origin/master -- db/migrate/ && exit 0 || git diff-index --quiet origin/master -- db/schema.rb && echo 'Please commit changes to schema.rb' && exit 1 || exit 0
+
+  check-db-setup:
+    executor:
+      name: test-stack
+    steps:
+      - add-cryotrack-ssh-key
+      - checkout
+      - config-setup
+      - bundle-setup
+      - wait-for-db
+      - wait-for-elasticsearch
+      - run:
+          name: bin/rake db:setup
+          command: bin/rake db:create db:setup
+
+  test:
+    executor:
+      name: test-stack
+    parallelism: 4
+    steps:
+      - add-cryotrack-ssh-key
+      - checkout
+      - config-setup
+      - bundle-setup
+      - yarn-setup
+      - webpacker-build
+      - wait-for-db
+      - wait-for-elasticsearch
+      - database-setup
+      - test-app
+      - stash-coverage-results
+      - notify-external-services
+
+  merge-coverage-results:
+    executor:
+      name: test-stack
+    steps:
+      - merge-coverage
+
+  deploy:
+    executor:
+      name: deploy-stack
+    steps:
+      - add-cryotrack-ssh-key
+      - add_ssh_keys:
+          fingerprints:
+            - "eb:62::67" # github read/write key, needed to push a new tag
+            - "d3:66:6"
+      - checkout
+      - path-add-node-modules
+      - bundle-setup
+      - yarn-setup
+      - run:
+          name: Deploy master branch to staging group
+          command: RAILS_MASTER_KEY=${STAGING_RAILS_MASTER_KEY} bundle exec cap staging deploy groups=staging
+          environment:
+            DEPLOY_BRANCH: master
+            USER: CircleCI # for capistrano to use in the deploy:log_revision task
+            GIT_COMMITTER_EMAIL: circleci@test.com # for committing a tag
+            GIT_COMMITTER_NAME: CircleCI # for committing a tag
+      - notify-external-services
+
 workflows:
-  deploy_application:
+  build_test_deploy:
     jobs:
+      - check-missing-schema-changes
+      - check-db-setup
+      - test:
+          post-steps:
+ #           - jira/notify
+      - merge-coverage-results:
+          requires:
+            - test
+      
       - aws-code-deploy/deploy:
           application-name: sampleapp
           arguments: '--profile default'
@@ -11,3 +314,10 @@ workflows:
           bundle-key: sample/$CIRCLE_PROJECT_REPONAME-${CIRCLE_BRANCH}-$CIRCLE_TAG-$CIRCLE_BUILD_NUM-$CIRCLE_JOB
           deployment-group: sampleapp-group
           service-role-arn: arn:aws:iam::978016941027:role/sampleappdeploy
+          requires:
+            - test
+          filters:
+            branches:${CIRCLE_BRANCH}
+              only: 
+          post-steps:
+#            - jira/notify
