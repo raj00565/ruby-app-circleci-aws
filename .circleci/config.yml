@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  status_to_ms_teams: bluemarblepayroll/status_to_ms_teams_pure_bash@1.0.1
+  #status_to_ms_teams: bluemarblepayroll/status_to_ms_teams_pure_bash@1.0.1
   jira: circleci/jira@1.1.2
   aws-code-deploy: circleci/aws-code-deploy@1.0.1
 
@@ -264,7 +264,7 @@ jobs:
       - database-setup
       - test-app
       - stash-coverage-results
-      - notify-external-services
+    #  - notify-external-services
 
   merge-coverage-results:
     executor:
@@ -293,7 +293,7 @@ jobs:
             USER: CircleCI # for capistrano to use in the deploy:log_revision task
             GIT_COMMITTER_EMAIL: circleci@test.com # for committing a tag
             GIT_COMMITTER_NAME: CircleCI # for committing a tag
-      - notify-external-services
+   #   - notify-external-services
 
 workflows:
   build_test_deploy:
