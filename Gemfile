@@ -8,7 +8,7 @@ group :development do
   gem 'capistrano-sidekiq'
   gem 'capistrano-npm'
 end
-
+gem 'webpack-rails',
 gem 'rails',                   '5.1.2'
 gem 'bcrypt',                  '3.1.11'
 gem 'faker',                   '1.6.3'
