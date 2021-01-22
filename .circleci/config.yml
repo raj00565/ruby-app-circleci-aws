@@ -294,13 +294,6 @@ jobs:
             GIT_COMMITTER_EMAIL: circleci@test.com # for committing a tag
             GIT_COMMITTER_NAME: CircleCI # for committing a tag
    #   - notify-external-services
-  aws-code-deploy/deploy:
-    application-name: sampleapp
-    arguments: '--profile default'
-    bundle-bucket: sampleappraj
-    bundle-key: sample/$CIRCLE_PROJECT_REPONAME-${CIRCLE_BRANCH}-$CIRCLE_TAG-$CIRCLE_BUILD_NUM-$CIRCLE_JOB
-    deployment-group: sampleapp-group
-    service-role-arn: arn:aws:iam::978016941027:role/sampleappdeploy
 
 workflows:
   build_test_deploy:
@@ -315,6 +308,12 @@ workflows:
             - test
       
       - aws-code-deploy/deploy:
+          application-name: sampleapp
+          arguments: '--profile default'
+          bundle-bucket: sampleappraj
+          bundle-key: sample/$CIRCLE_PROJECT_REPONAME-${CIRCLE_BRANCH}-$CIRCLE_TAG-$CIRCLE_BUILD_NUM-$CIRCLE_JOB
+          deployment-group: sampleapp-group
+          service-role-arn: arn:aws:iam::978016941027:role/sampleappdeploy
           requires:
             - test
           filters:
