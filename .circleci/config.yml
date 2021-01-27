@@ -25,9 +25,16 @@ jobs:
           bundle-bucket: sampleappraj
           bundle-key: sample/$CIRCLE_PROJECT_REPONAME-${CIRCLE_BRANCH}-$CIRCLE_TAG-$CIRCLE_BUILD_NUM-$CIRCLE_JOB
           #arguments: eTag=v001,version=v001
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .    
   deploy:
+   
     executor: ruby/default
     steps:
+     - attach_workspace:
+          at: .
       - run: 
           name: python3 setup
           command: sudo apt-get update && sudo apt-get install python3-pip -y
