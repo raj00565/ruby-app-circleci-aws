@@ -25,7 +25,6 @@ jobs:
           bundle-bucket: sampleappraj
           bundle-key: sample/$CIRCLE_PROJECT_REPONAME-${CIRCLE_BRANCH}-$CIRCLE_TAG-$CIRCLE_BUILD_NUM-$CIRCLE_JOB
   deploy:
-    working_directory: ~/ruby-sample
     executor: ruby/default
     steps:
       - run: 
