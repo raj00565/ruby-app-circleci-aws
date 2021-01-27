@@ -24,7 +24,7 @@ jobs:
           bundle-source: ~/ruby-sample
           bundle-bucket: sampleappraj
           bundle-key: sample/$CIRCLE_PROJECT_REPONAME-${CIRCLE_BRANCH}-$CIRCLE_TAG-$CIRCLE_JOB
-          #arguments: eTag=v001,version=v001
+          arguments: eTag=v001
       - persist_to_workspace:
           root: .
           paths:
