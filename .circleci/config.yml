@@ -67,12 +67,9 @@ workflows:
       - test:
           requires:
             - build
-      - aws-code-deploy/deploy:
-          application-name: sampleapp # The name of an AWS CodeDeploy application associated with the applicable IAM user or AWS account.
-          arguments: '--profile default'
-          deployment-group: sampleapp-group # The name of a new deployment group for the specified application.
-          service-role-arn: arn:aws:iam::978016941027:role/sampleappdeploy # The service role for a deployment group.
-          bundle-bucket: sampleappraj # The s3 bucket where an application revision will be stored.
-          bundle-key: sample/$CIRCLE_PROJECT_REPONAME-${CIRCLE_BRANCH}-$CIRCLE_TAG-$CIRCLE_BUILD_NUM-$CIRCLE_JOB # A key under the s3 bucket where an application revision will be stored.          
-          requires:
-            - build
+      - aws-code-deploy/deploy-bundle:
+          application-name: sampleapp
+          deployment-group: sampleapp-group
+          bundle-bucket: sampleappraj
+          bundle-key: sample/$CIRCLE_PROJECT_REPONAME-${CIRCLE_BRANCH}-$CIRCLE_TAG-$CIRCLE_BUILD_NUM-$CIRCLE_JOB          
+ 
