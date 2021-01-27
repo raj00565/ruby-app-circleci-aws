@@ -8,9 +8,7 @@ orbs:
 jobs:
   build:
     working_directory: ~/ruby-sample
-    
-    docker:
-      - image: cimg/ruby:2.7-node
+    executor: ruby/default
     steps:
       - checkout
       - run: 
