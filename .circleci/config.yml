@@ -16,10 +16,6 @@ jobs:
           command: sudo apt-get update && sudo apt-get install libsqlite3-dev yarn -y
       - ruby/install-deps
       # Store bundle cache
-      - node/install-packages:
-          app-dir: ~/ruby-sample
-          pkg-manager: yarn
-          cache-key: "yarn.lock"
   test:
     parallelism: 1
     docker:
