@@ -34,6 +34,9 @@ jobs:
       RAILS_ENV: test
     steps:
       - checkout
+      - run: 
+          name:install sqlite3
+          command: gem install sqlite3
       - ruby/install-deps
       - node/install-packages:
           pkg-manager: yarn
