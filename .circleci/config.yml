@@ -23,7 +23,7 @@ jobs:
           application-name: sampleapp
           bundle-source: ~/ruby-sample
           bundle-bucket: sampleappraj
-          bundle-key: sample/$CIRCLE_PROJECT_REPONAME-${CIRCLE_BRANCH}-$CIRCLE_TAG-$CIRCLE_BUILD_NUM-$CIRCLE_JOB
+          bundle-key: sample/$CIRCLE_PROJECT_REPONAME-${CIRCLE_BRANCH}-$CIRCLE_TAG-$CIRCLE_JOB
           #arguments: eTag=v001,version=v001
       - persist_to_workspace:
           root: .
@@ -43,7 +43,7 @@ jobs:
           application-name: sampleapp
           deployment-group: sampleapp-group
           bundle-bucket: sampleappraj
-          bundle-key: sample/$CIRCLE_PROJECT_REPONAME-${CIRCLE_BRANCH}-$CIRCLE_TAG-$CIRCLE_BUILD_NUM-$CIRCLE_JOB      
+          bundle-key: sample/$CIRCLE_PROJECT_REPONAME-${CIRCLE_BRANCH}-$CIRCLE_TAG-$CIRCLE_JOB      
   test:
     parallelism: 1
     docker:
