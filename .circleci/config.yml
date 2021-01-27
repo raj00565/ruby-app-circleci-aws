@@ -23,7 +23,20 @@ jobs:
           application-name: sampleapp
           bundle-source: ~/ruby-sample
           bundle-bucket: sampleappraj
-          bundle-key: sample/$CIRCLE_PROJECT_REPONAME-${CIRCLE_BRANCH}-$CIRCLE_TAG-$CIRCLE_BUILD_NUM-$CIRCLE_JOB  
+          bundle-key: sample/$CIRCLE_PROJECT_REPONAME-${CIRCLE_BRANCH}-$CIRCLE_TAG-$CIRCLE_BUILD_NUM-$CIRCLE_JOB
+  deploy:
+    working_directory: ~/ruby-sample
+    executor: ruby/default
+    steps:
+      - run: 
+          name: python3 setup
+          command: sudo apt-get update && sudo apt-get install python3-pip -y
+      - aws-cli/setup
+      - aws-code-deploy/deploy-bundle:
+          application-name: sampleapp
+          deployment-group: sampleapp-group
+          bundle-bucket: sampleappraj
+          bundle-key: sample/$CIRCLE_PROJECT_REPONAME-${CIRCLE_BRANCH}-$CIRCLE_TAG-$CIRCLE_BUILD_NUM-$CIRCLE_JOB      
   test:
     parallelism: 1
     docker:
@@ -67,9 +80,5 @@ workflows:
       - test:
           requires:
             - build
-      - aws-code-deploy/deploy-bundle:
-          application-name: sampleapp
-          deployment-group: sampleapp-group
-          bundle-bucket: sampleappraj
-          bundle-key: sample/$CIRCLE_PROJECT_REPONAME-${CIRCLE_BRANCH}-$CIRCLE_TAG-$CIRCLE_BUILD_NUM-$CIRCLE_JOB          
+         
  
