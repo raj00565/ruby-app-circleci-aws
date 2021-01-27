@@ -12,8 +12,8 @@ jobs:
     steps:
       - checkout
       - run: 
-          name: install sqlite3
-          command: sudo apt-get update && sudo apt-get install libsqlite3-dev -y
+          name: install sqlite3 and yarn
+          command: sudo apt-get update && sudo apt-get install libsqlite3-dev yarn -y
       - ruby/install-deps
       # Store bundle cache
       - node/install-packages:
