@@ -13,6 +13,7 @@ pip3 list | grep -q ansible
 if [ $? != 0 ]; then
     pip3 install ansible
 fi
+chown -R cryo:cryo /home/cryo
 
 
 
