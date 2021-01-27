@@ -87,8 +87,8 @@ workflows:
       - deploy:
          requires:
             - build
-      - test:
-          requires:
-            - build
+ #     - test:
+ #         requires:
+ #           - build
          
  
