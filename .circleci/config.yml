@@ -11,6 +11,9 @@ jobs:
       - image: cimg/ruby:2.7-node
     steps:
       - checkout
+      - run: 
+          name: install sqlite3
+          command: apt-get install libsqlite3-de -y
       - ruby/install-deps
       # Store bundle cache
       - node/install-packages:
