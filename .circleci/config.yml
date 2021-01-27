@@ -7,6 +7,8 @@ orbs:
 
 jobs:
   build:
+    working_directory: ~/ruby-sample
+    
     docker:
       - image: cimg/ruby:2.7-node
     steps:
@@ -17,6 +19,8 @@ jobs:
       - ruby/install-deps
       # Store bundle cache
       - node/install-packages:
+          app-dir: ~/ruby-sample
+          cache-path: node_modules
           pkg-manager: yarn
           cache-key: "yarn.lock"
   test:
