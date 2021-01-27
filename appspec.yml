@@ -8,10 +8,10 @@ hooks:
 #    - location: before_install.sh
 #      timeout: 300
 #      runas: root
-#  ApplicationStart:
-#    - location: application_start.sh
-#      timeout: 1000
-#      runas: root
+  ApplicationStart:
+    - location: application_start.sh
+      timeout: 1000
+      runas: root
 #  ValidateService:
 #    - location: verify_service.sh
 #      timeout: 300
