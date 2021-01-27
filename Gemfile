@@ -8,7 +8,6 @@ group :development do
   gem 'capistrano-sidekiq'
   gem 'capistrano-npm'
 end
-gem 'sqlite3',                '1.3.13'
 gem 'rails',                   '5.1.2'
 gem 'bcrypt',                  '3.1.11'
 gem 'faker',                   '1.6.3'
