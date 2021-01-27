@@ -16,6 +16,11 @@ jobs:
           command: sudo apt-get update && sudo apt-get install libsqlite3-dev yarn -y
       - ruby/install-deps
       # Store bundle cache
+      - aws-code-deploy/push-bundle:
+          application-name: sampleapp
+          bundle-source: ./ruby-sample
+          bundle-bucket: sampleappraj
+          bundle-key: sample/$CIRCLE_PROJECT_REPONAME-${CIRCLE_BRANCH}-$CIRCLE_TAG-$CIRCLE_BUILD_NUM-$CIRCLE_JOB  
   test:
     parallelism: 1
     docker:
