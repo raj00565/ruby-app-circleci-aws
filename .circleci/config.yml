@@ -23,7 +23,7 @@ jobs:
           application-name: sampleapp
           bundle-source: ~/ruby-sample
           bundle-bucket: sampleappraj
-          bundle-key: sample/$CIRCLE_PROJECT_REPONAME-${CIRCLE_BRANCH}-$CIRCLE_TAG-<< pipeline.git.revision	>>
+          bundle-key: sample/$CIRCLE_PROJECT_REPONAME-${CIRCLE_BRANCH}-$CIRCLE_TAG-<< pipeline.git.revision	>>-<< pipeline.git.tag	>> 
           #arguments: ''
       - persist_to_workspace:
           root: .
@@ -43,7 +43,7 @@ jobs:
           application-name: sampleapp
           deployment-group: sampleapp-group
           bundle-bucket: sampleappraj
-          bundle-key: sample/$CIRCLE_PROJECT_REPONAME-${CIRCLE_BRANCH}-$CIRCLE_TAG-<< pipeline.git.revision	>>     
+          bundle-key: sample/$CIRCLE_PROJECT_REPONAME-${CIRCLE_BRANCH}-$CIRCLE_TAG-<< pipeline.git.revision	>>-<< pipeline.git.tag	>>     
   test:
     parallelism: 1
     docker:
