@@ -13,7 +13,7 @@ jobs:
       - checkout
       - run: 
           name: install sqlite3
-          command: sudo apt-get update && sudo apt-get install libsqlite3-de -y
+          command: sudo apt-get update && sudo apt-get install libsqlite3-dev -y
       - ruby/install-deps
       # Store bundle cache
       - node/install-packages:
