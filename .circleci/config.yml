@@ -12,11 +12,11 @@ jobs:
     working_directory: ~/ruby-sample
     executor: ruby/default
     steps:
-      - checkout
-      - aws-cli/setup
       - run: 
           name: install sqlite3 and yarn
-          command: sudo apt-get update && sudo apt-get install libsqlite3-dev yarn -y
+          command: sudo apt-get update && sudo apt-get install libsqlite3-dev yarn python3-pip -y
+      - checkout
+      - aws-cli/setup
       - ruby/install-deps
       # Store bundle cache
       - aws-code-deploy/push-bundle:
