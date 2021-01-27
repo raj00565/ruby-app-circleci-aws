@@ -18,7 +18,6 @@ jobs:
       # Store bundle cache
       - node/install-packages:
           app-dir: ~/ruby-sample
-          cache-path: node_modules
           pkg-manager: yarn
           cache-key: "yarn.lock"
   test:
