@@ -8,8 +8,8 @@ orbs:
   aws-code-deploy: circleci/aws-code-deploy@1.0.1
 
 jobs:
-  build:
-    working_directory: ~/ruby-sample
+  build_stage:
+    working_directory: ~/ruby-stage
     executor: ruby/default
     steps:
       - run: 
@@ -21,7 +21,7 @@ jobs:
       # Store bundle cache
       - aws-code-deploy/push-bundle:
           application-name: sampleapp
-          bundle-source: ~/ruby-sample
+          bundle-source: ~/ruby-stage
           bundle-bucket: sampleappraj
           bundle-key: sample/$CIRCLE_PROJECT_REPONAME-${CIRCLE_BRANCH}-$CIRCLE_TAG-<< pipeline.git.revision	>>-<< pipeline.git.tag	>> 
           #arguments: ''
@@ -29,7 +29,7 @@ jobs:
           root: .
           paths:
             - .    
-  deploy:
+  deploy_stage:
    
     executor: ruby/default
     steps:
@@ -43,7 +43,46 @@ jobs:
           application-name: sampleapp
           deployment-group: sampleapp-group
           bundle-bucket: sampleappraj
-          bundle-key: sample/$CIRCLE_PROJECT_REPONAME-${CIRCLE_BRANCH}-$CIRCLE_TAG-<< pipeline.git.revision	>>-<< pipeline.git.tag	>>     
+          bundle-key: sample/$CIRCLE_PROJECT_REPONAME-${CIRCLE_BRANCH}-$CIRCLE_TAG-<< pipeline.git.revision	>>-<< pipeline.git.tag	>> 
+
+build_prod:
+    working_directory: ~/ruby-prod
+    executor: ruby/default
+    steps:
+      - run: 
+          name: install sqlite3 and yarn
+          command: sudo apt-get update && sudo apt-get install libsqlite3-dev yarn python3-pip -y
+      - checkout
+      - aws-cli/setup
+      - ruby/install-deps
+      # Store bundle cache
+      - aws-code-deploy/push-bundle:
+          application-name: sampleapp
+          bundle-source: ~/ruby-prod
+          bundle-bucket: sampleappraj
+          bundle-key: sample/$CIRCLE_PROJECT_REPONAME-${CIRCLE_BRANCH}-$CIRCLE_TAG-<< pipeline.git.revision	>>-<< pipeline.git.tag	>> 
+          #arguments: ''
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .    
+  deploy_prod:
+   
+    executor: ruby/default
+    steps:
+      - attach_workspace:
+          at: .
+      - run: 
+          name: python3 setup
+          command: sudo apt-get update && sudo apt-get install python3-pip -y
+      - aws-cli/setup
+      - aws-code-deploy/deploy-bundle:
+          application-name: sampleapp
+          deployment-group: sampleapp-group
+          bundle-bucket: sampleappraj
+          bundle-key: sample/$CIRCLE_PROJECT_REPONAME-${CIRCLE_BRANCH}-$CIRCLE_TAG-<< pipeline.git.revision	>>-<< pipeline.git.tag	>> 
+
+
   test:
     parallelism: 1
     docker:
@@ -81,12 +120,36 @@ jobs:
 
 workflows:
   version: 2
-  build_and_test_deploy:
+  build-deploy:
     jobs:
-      - build
-      - deploy:
-         requires:
-            - build
+      - build_stage:
+          filters:
+            branches:
+              only: staging
+              ignore:
+                - develop
+                - /feature-.*/
+      - deploy_stage:
+          requires:
+            - build_stage
+          filters:
+            branches:
+              only: staging
+      - deploy_prod:
+          requires:
+            - build_prod
+          filters:
+            branches:
+              only: master
+              
+#workflows:
+#  version: 2
+#  build_and_test_deploy:
+#    jobs:
+#      - build
+#      - deploy:
+#         requires:
+#            - build
  #     - test:
  #         requires:
  #           - build
