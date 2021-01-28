@@ -120,7 +120,7 @@ build_prod:
 
 workflows:
   version: 2
-  build-deploy:
+  build-deploy-stage:
     jobs:
       - build_stage:
           filters:
@@ -135,6 +135,16 @@ workflows:
           filters:
             branches:
               only: staging
+  build-deploy-prod:
+    jobs:
+      - build_prod:
+          filters:
+            branches:
+              only: staging
+              ignore:
+                - develop
+                - /feature-.*/
+                
       - deploy_prod:
           requires:
             - build_prod
