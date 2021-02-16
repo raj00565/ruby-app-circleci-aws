@@ -45,7 +45,7 @@ jobs:
           bundle-bucket: sampleappraj
           bundle-key: sample/$CIRCLE_PROJECT_REPONAME-${CIRCLE_BRANCH}-$CIRCLE_TAG-<< pipeline.git.revision	>>-<< pipeline.git.tag	>> 
 
-build_prod:
+  build_prod:
     working_directory: ~/ruby-prod
     executor: ruby/default
     steps:
